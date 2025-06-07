@@ -1,0 +1,44 @@
+name: Daily Automated Commit
+
+# Run on a schedule using cron syntax
+on:
+  schedule:
+    # Run at *:0 UTC hourly
+    - cron: '0 * * * *'
+  
+  # Allow manual triggering for testing
+  workflow_dispatch:
+
+jobs:
+  create_commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Update file
+        run: |
+          echo "This step is run by 24f2006438@ds.study.iitm.ac.in"
+          echo "Current time: $(date)"
+          echo "Last updated: $(date)" > update.txt
+      
+      - name: Commit changes
+        run: |
+          git config --local user.email "24f2006438@ds.study.iitm.ac.in"
+          git config --local user.name "GitHub Action"
+          git add update.txt
+          git commit -m "Automated update $(date)" || echo "No changes to commit"
+      
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${ secrets.GITHUB_TOKEN }
+          branch: main
